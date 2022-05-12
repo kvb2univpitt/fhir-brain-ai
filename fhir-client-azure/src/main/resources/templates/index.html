@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="../static/bootstrap/css/bootstrap.min.css" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+        <title>Brain AI FHIR</title>
+        <style>
+            html,
+            body {
+                height: 100%;
+            }
+            body {
+                display: flex;
+                align-items: center;
+                background-color: #f5f5f5;
+            }
+        </style>
+    </head>
+    <body class="text-center">
+        <main style="width: 100%">
+            <a class="btn btn-secondary btn-lg" href="#" th:href="@{/fhir}" role="button">Brain AI FHIR</a>
+        </main>
+    </body>
+</html>
