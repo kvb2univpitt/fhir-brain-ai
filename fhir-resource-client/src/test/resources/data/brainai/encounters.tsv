@@ -1,0 +1,2 @@
+ENCNTR_ID	REG_DT_TM	DISCH_DT_TM	PERSON_ID	ENCNTR_TYPE_CD	code_value.display	snomed_code	REASON_FOR_VISIT
+enc1	03/11/2021 08:01:00 PM 	03/14/2021 08:45:00 PM 	010cbf98-d5f4-11ec-9d64-0242ac120002	394656005	Inpatient care	126598008	Neoplasm of connective tissues disorder
