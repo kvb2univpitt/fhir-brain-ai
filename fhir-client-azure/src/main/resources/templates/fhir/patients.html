@@ -93,14 +93,16 @@
                         {data: 'gender'},
                         {data: 'id'}
                     ],
-                    "columnDefs": [{
-                            "targets": 3,
-                            "searchable": false,
-                            "orderable": false,
-                            "render": function (data, type, row, meta) {
+                    columnDefs: [
+                        {
+                            targets: 3,
+                            searchable: false,
+                            orderable: false,
+                            render: function (data, type, row, meta) {
                                 return `<a href="patient/${row.id}" class="a-link-plain">${row.id}</a>`;
                             }
-                        }]
+                        }
+                    ]
                 });
             });
         </script>

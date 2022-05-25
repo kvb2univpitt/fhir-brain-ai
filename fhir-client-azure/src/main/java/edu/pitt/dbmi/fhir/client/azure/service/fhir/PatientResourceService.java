@@ -23,11 +23,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import edu.pitt.dbmi.fhir.client.azure.dto.BasicPatientDTO;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,6 +50,23 @@ public class PatientResourceService {
         this.fhirContext = fhirContext;
     }
 
+    public Patient getPatient(final OAuth2AccessToken accessToken, final String id) {
+        IGenericClient client = fhirContext.newRestfulGenericClient(fhirUrl);
+        client.registerInterceptor(new BearerTokenAuthInterceptor(accessToken.getTokenValue()));
+
+        Bundle bundle = client.search()
+                .forResource(Patient.class)
+                .where(Patient.RES_ID.exactly().identifier(id))
+                .returnBundle(Bundle.class)
+                .cacheControl(new CacheControlDirective().setNoCache(true))
+                .execute();
+
+        return bundle.getEntry().stream()
+                .map(e -> (Patient) e.getResource())
+                .findFirst()
+                .orElse(null);
+    }
+
     public int getPatientCounts(OAuth2AccessToken accessToken) {
         IGenericClient client = fhirContext.newRestfulGenericClient(fhirUrl);
         client.registerInterceptor(new BearerTokenAuthInterceptor(accessToken.getTokenValue()));
@@ -77,33 +90,6 @@ public class PatientResourceService {
                 .returnBundle(Bundle.class)
                 .cacheControl(new CacheControlDirective().setNoCache(true))
                 .execute();
-    }
-
-    public List<Patient> getPatients(Bundle bundle) {
-        return bundle.getEntry().stream()
-                .map(e -> (Patient) e.getResource())
-                .collect(Collectors.toList());
-    }
-
-    public List<BasicPatientDTO> getBasicPatientInfo(Bundle bundle) {
-        return bundle.getEntry().stream()
-                .map(e -> {
-                    Patient patient = (Patient) e.getResource();
-
-                    BasicPatientDTO patientDTO = new BasicPatientDTO();
-                    patientDTO.setId(patient.getIdElement().getIdPart());
-                    patientDTO.setGender(patient.getGender().getDisplay());
-
-                    patient.getName().stream()
-                            .filter(name -> name.getUse() == HumanName.NameUse.OFFICIAL)
-                            .forEach(name -> {
-                                patientDTO.setLastName(name.getFamily());
-                                patientDTO.setFirstName(name.getGivenAsSingleString());
-                            });
-
-                    return patientDTO;
-                })
-                .collect(Collectors.toList());
     }
 
 }

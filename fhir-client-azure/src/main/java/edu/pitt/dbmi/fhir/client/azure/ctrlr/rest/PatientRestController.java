@@ -20,6 +20,7 @@ package edu.pitt.dbmi.fhir.client.azure.ctrlr.rest;
 
 import edu.pitt.dbmi.fhir.client.azure.dto.BasicPatientDTO;
 import edu.pitt.dbmi.fhir.client.azure.service.fhir.PatientResourceService;
+import edu.pitt.dbmi.fhir.client.azure.utils.fhir.PatientUtils;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,7 @@ public class PatientRestController {
     public List<BasicPatientDTO> getPatients(@RegisteredOAuth2AuthorizedClient("azure") final OAuth2AuthorizedClient authorizedClient) {
         Bundle bundle = patientResourceService.getPatients(authorizedClient.getAccessToken());
 
-        return patientResourceService.getBasicPatientInfo(bundle);
+        return PatientUtils.getBasicPatientInfo(bundle);
     }
 
 }
