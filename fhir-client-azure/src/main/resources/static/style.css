@@ -68,3 +68,7 @@ body {
     font-size: .75rem;
     text-transform: uppercase;
 }
+
+.a-link-plain {
+    text-decoration: none;
+}

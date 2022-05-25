@@ -35,7 +35,6 @@ public class BasicPatientDTO implements Serializable {
     private String lastName;
     private String firstName;
     private String gender;
-    private String resourceUrl;
 
     public BasicPatientDTO() {
     }
@@ -70,14 +69,6 @@ public class BasicPatientDTO implements Serializable {
 
     public void setGender(String gender) {
         this.gender = gender;
-    }
-
-    public String getResourceUrl() {
-        return resourceUrl;
-    }
-
-    public void setResourceUrl(String resourceUrl) {
-        this.resourceUrl = resourceUrl;
     }
 
 }

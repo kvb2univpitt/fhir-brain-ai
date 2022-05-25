@@ -68,7 +68,6 @@ public class PatientResourceService {
     }
 
     public Bundle getPatients(OAuth2AccessToken accessToken) {
-        // register the interceptor with the client
         IGenericClient client = fhirContext.newRestfulGenericClient(fhirUrl);
         client.registerInterceptor(new BearerTokenAuthInterceptor(accessToken.getTokenValue()));
 
@@ -94,7 +93,6 @@ public class PatientResourceService {
                     BasicPatientDTO patientDTO = new BasicPatientDTO();
                     patientDTO.setId(patient.getIdElement().getIdPart());
                     patientDTO.setGender(patient.getGender().getDisplay());
-                    patientDTO.setResourceUrl(patient.getId());
 
                     patient.getName().stream()
                             .filter(name -> name.getUse() == HumanName.NameUse.OFFICIAL)

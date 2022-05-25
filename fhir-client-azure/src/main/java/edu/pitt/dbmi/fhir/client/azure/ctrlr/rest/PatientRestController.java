@@ -16,51 +16,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301  USA
  */
-package edu.pitt.dbmi.fhir.client.azure.ctrlr;
+package edu.pitt.dbmi.fhir.client.azure.ctrlr.rest;
 
-import ca.uhn.fhir.parser.IParser;
+import edu.pitt.dbmi.fhir.client.azure.dto.BasicPatientDTO;
 import edu.pitt.dbmi.fhir.client.azure.service.fhir.PatientResourceService;
+import java.util.List;
+import org.hl7.fhir.r4.model.Bundle;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
+import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
- * May 10, 2022 12:52:10 AM
+ * May 20, 2022 10:46:38 AM
  *
  * @author Kevin V. Bui (kvb2univpitt@gmail.com)
  */
-@Controller
-public class ApplicationController {
+@RestController
+@RequestMapping("/fhir/api/patient")
+public class PatientRestController {
 
     private final PatientResourceService patientResourceService;
-    private final IParser jsonParser;
 
     @Autowired
-    public ApplicationController(PatientResourceService patientResourceService, IParser jsonParser) {
+    public PatientRestController(PatientResourceService patientResourceService) {
         this.patientResourceService = patientResourceService;
-        this.jsonParser = jsonParser;
     }
 
-    @GetMapping("/")
-    public String showIndexPage(final Authentication authen) {
-        return (authen == null)
-                ? "login"
-                : "redirect:/fhir";
-    }
+    @GetMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<BasicPatientDTO> getPatients(@RegisteredOAuth2AuthorizedClient("azure") final OAuth2AuthorizedClient authorizedClient) {
+        Bundle bundle = patientResourceService.getPatients(authorizedClient.getAccessToken());
 
-    @GetMapping("/fhir")
-    public String showMainResourcePage(
-            @RegisteredOAuth2AuthorizedClient("azure") final OAuth2AuthorizedClient authorizedClient,
-            final Model model) {
-        model.addAttribute("authenName", authorizedClient.getPrincipalName());
-        model.addAttribute("patientCounts", patientResourceService.getPatientCounts(authorizedClient.getAccessToken()));
-
-        return "fhir/home";
+        return patientResourceService.getBasicPatientInfo(bundle);
     }
 
 }
