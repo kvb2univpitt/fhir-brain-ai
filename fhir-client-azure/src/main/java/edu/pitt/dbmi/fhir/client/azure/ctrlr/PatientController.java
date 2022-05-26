@@ -18,7 +18,7 @@
  */
 package edu.pitt.dbmi.fhir.client.azure.ctrlr;
 
-import edu.pitt.dbmi.fhir.client.azure.dto.PatientDTO;
+import ca.uhn.fhir.parser.IParser;
 import edu.pitt.dbmi.fhir.client.azure.service.fhir.PatientResourceService;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +39,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class PatientController {
 
     private final PatientResourceService patientResourceService;
+    private final IParser jsonParser;
 
     @Autowired
-    public PatientController(PatientResourceService patientResourceService) {
+    public PatientController(PatientResourceService patientResourceService, IParser jsonParser) {
         this.patientResourceService = patientResourceService;
+        this.jsonParser = jsonParser;
     }
 
     @GetMapping("/fhir/patient/{id}")
@@ -53,7 +55,7 @@ public class PatientController {
         Patient patient = patientResourceService.getPatient(authorizedClient.getAccessToken(), id);
 
         model.addAttribute("authenName", authorizedClient.getPrincipalName());
-        model.addAttribute("patient", new PatientDTO(patient));
+        model.addAttribute("patient", patient);
 
         return "fhir/patient";
     }

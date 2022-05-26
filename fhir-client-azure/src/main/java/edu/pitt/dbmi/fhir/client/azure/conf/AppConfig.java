@@ -20,6 +20,7 @@ package edu.pitt.dbmi.fhir.client.azure.conf;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import edu.pitt.dbmi.fhir.client.azure.utils.fhir.PatientHelper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -40,6 +41,11 @@ public class AppConfig {
     @Bean
     public IParser jsonParser(FhirContext fhirContext) {
         return fhirContext.newJsonParser();
+    }
+
+    @Bean
+    public PatientHelper patientHelper() {
+        return new PatientHelper();
     }
 
 }

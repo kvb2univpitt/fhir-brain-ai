@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.HumanName.NameUse;
 import org.hl7.fhir.r4.model.Patient;
 
 /**
@@ -34,6 +35,18 @@ import org.hl7.fhir.r4.model.Patient;
 public final class PatientUtils {
 
     private PatientUtils() {
+    }
+
+    public static String printHello() {
+        return "Hello, Kevin";
+    }
+
+    public static String getPatientName(Patient patient, NameUse nameUse) {
+        return patient.getName().stream()
+                .filter(name -> name.getUse() == nameUse)
+                .map(name -> String.format("%s %s", name.getGivenAsSingleString(), name.getFamily()))
+                .collect(Collectors.joining(", "))
+                .trim();
     }
 
     public static List<Patient> getPatients(Bundle bundle) {

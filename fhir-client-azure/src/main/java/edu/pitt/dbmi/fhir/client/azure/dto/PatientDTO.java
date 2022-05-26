@@ -59,9 +59,22 @@ public class PatientDTO {
             return Collections.EMPTY_LIST;
         }
 
+        patient.getAddress().forEach(address -> {
+            address.getCity();
+            address.getCountry();
+            address.getState();
+            address.getPostalCode();
+            address.getText();
+            address.getUse().getDisplay();
+        });
+
         return patient.getName().stream()
                 .map(name -> new Name(name.getUse().getDisplay(), name.getGivenAsSingleString(), name.getFamily()))
                 .collect(Collectors.toList());
+    }
+
+    public class Identifier {
+
     }
 
     public class Name {

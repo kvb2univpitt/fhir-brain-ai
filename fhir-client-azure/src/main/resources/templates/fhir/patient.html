@@ -4,6 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="../../static/bootstrap/css/bootstrap.min.css" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+        <link rel="stylesheet" href="../../static/bootstrap-icons/bootstrap-icons.css" th:href="@{/bootstrap-icons/bootstrap-icons.css}" />
         <link rel="stylesheet" href="../../static/style.css" th:href="@{/style.css}" />
         <title>Patient</title>
     </head>
@@ -40,34 +41,151 @@
                 </nav>
                 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h2 th:text="${patient.getOfficialName()}">Resources</h2>
+                        <h2 th:text="${@patientHelper.getOfficialName(patient.getName())}">Resources</h2>
                     </div>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="#" th:href="@{/fhir}">FHIR Resources</a></li>
                         <li class="breadcrumb-item"><a href="#" th:href="@{/fhir/patient}">Patient Resources</a></li>
                         <li class="breadcrumb-item active">Patient</li>
                     </ol>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-sm">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Family Name</th>
-                                    <th scope="col">Given Name</th>
-                                    <th scope="col">Type</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="name : ${patient.getNames()}">
-                                    <td th:text="${name.last}" />
-                                    <td th:text="${name.first}" />
-                                    <td th:text="${name.type}" />
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">Identifier</div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Value</th>
+                                                    <th scope="col">System</th>
+                                                    <th scope="col">Type</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="id : ${patient.getIdentifier()}">
+                                                    <td th:text="${id.getValue()}" />
+                                                    <td th:text="${id.getSystem()}" />
+                                                    <td>
+                                                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#idType" th:data-bs-type="${@patientHelper.getCodingAsJson(id.getType().getCoding())}">
+                                                            <i class="bi bi-window"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="card mt-3">
+                                <div class="card-header">Name</div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Family Name</th>
+                                                    <th scope="col">Given Name</th>
+                                                    <th scope="col">Type</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="name : ${patient.getName()}">
+                                                    <td th:text="${name.getFamily()}" />
+                                                    <td th:text="${name.getGivenAsSingleString()}" />
+                                                    <td th:text="${name.getUse().getDisplay()}" />
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card mt-3">
+                                <div class="card-header">Address</div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Street</th>
+                                                    <th scope="col">City</th>
+                                                    <th scope="col">State</th>
+                                                    <th scope="col">Zip</th>
+                                                    <th scope="col">Country</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="address : ${patient.getAddress()}">
+                                                    <td th:text="${address.getText()}" />
+                                                    <td th:text="${address.getCity()}" />
+                                                    <td th:text="${address.getState()}" />
+                                                    <td th:text="${address.getPostalCode()}" />
+                                                    <td th:text="${address.getCountry()}" />
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </main>
             </div>
         </div>
-        <script src="../../static/bootstrap/js/bootstrap.min.js" th:src="@{/bootstrap/css/bootstrap.min.js}"></script>
+        <div class="modal fade" id="idType" tabindex="-1" aria-labelledby="identifierLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="identifierLabel">Identifier Types</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">System</th>
+                                        <th scope="col">Code</th>
+                                        <th scope="col">Display</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="../../static/jquery/jquery-3.6.0.slim.min.js" th:src="@{/jquery/jquery-3.6.0.slim.min.js}"></script>
+        <script src="../../static/bootstrap/js/bootstrap.min.js" th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+        <script>
+            $(document).ready(function () {
+                $('#idType').on('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const idType = button.getAttribute('data-bs-type');
+                    let types = JSON.parse(idType);
+
+                    let html = [];
+                    types.forEach(type => {
+                        let data = '<tr>';
+                        data += `<td>${type.system}</td><td>${type.code}</td><td>${type.display}</td>`;
+                        data += '</tr>';
+
+                        html.push(data);
+                    });
+
+                    $("#idType tbody").html(html.join('\n'));
+                });
+            });
+        </script>
     </body>
 </html>
