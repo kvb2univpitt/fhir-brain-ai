@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.StringType;
 
 /**
  *
@@ -38,6 +39,12 @@ public class PatientHelper {
 
     public PatientHelper() {
         this.objectMapper = new ObjectMapper();
+    }
+
+    public String getAddressLine(List<StringType> lines) {
+        return lines.stream()
+                .map(line -> line.getValueAsString())
+                .collect(Collectors.joining(" "));
     }
 
     public String getCodingAsJson(List<Coding> codings) {
