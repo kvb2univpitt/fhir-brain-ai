@@ -32,9 +32,8 @@ import java.util.Date;
 public final class DateFormatters {
 
     public static final DateFormat YYYY_MM_DD = new SimpleDateFormat("yyyy-mm-dd");
-    public static final DateFormat MM_DD_YYYY_HH_MM = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+    public static final DateFormat MM_DD_YYYY_HH_MM = new SimpleDateFormat("MM/dd/yyyy HH:mm aaa z");
 
-//    public static final DateTimeFormatter MM_DD_YYYY_HH_MM = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
     private DateFormatters() {
     }
 
