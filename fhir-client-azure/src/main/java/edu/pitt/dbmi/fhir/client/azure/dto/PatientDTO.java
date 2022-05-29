@@ -21,7 +21,6 @@ package edu.pitt.dbmi.fhir.client.azure.dto;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 
@@ -60,13 +59,16 @@ public class PatientDTO {
             return Collections.EMPTY_LIST;
         }
 
-        CodeableConcept maritalStatus = patient.getMaritalStatus();
-        maritalStatus.getCoding().forEach(status -> {
-            status.getCode();
-            status.getDisplay();
-            status.getSystem();
+        patient.getExtension().forEach(extension -> {
+            extension.getUrl();
         });
 
+//        CodeableConcept maritalStatus = patient.getMaritalStatus();
+//        maritalStatus.getCoding().forEach(status -> {
+//            status.getCode();
+//            status.getDisplay();
+//            status.getSystem();
+//        });
 //        patient.getName().forEach(name -> {
 //            name.getFamily();
 //        });

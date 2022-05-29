@@ -55,11 +55,9 @@ public final class PatientUtils {
                 .collect(Collectors.toList());
     }
 
-    public static List<BasicPatientDTO> getBasicPatientInfo(Bundle bundle) {
-        return bundle.getEntry().stream()
-                .map(e -> {
-                    Patient patient = (Patient) e.getResource();
-
+    public static List<BasicPatientDTO> getBasicPatientInfo(List<Patient> patients) {
+        return patients.stream()
+                .map(patient -> {
                     BasicPatientDTO patientDTO = new BasicPatientDTO();
                     patientDTO.setId(patient.getIdElement().getIdPart());
                     patientDTO.setGender(patient.getGender().getDisplay());

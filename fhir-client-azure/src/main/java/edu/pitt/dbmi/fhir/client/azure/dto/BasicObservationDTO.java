@@ -16,34 +16,54 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301  USA
  */
-package edu.pitt.dbmi.fhir.client.azure.utils;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+package edu.pitt.dbmi.fhir.client.azure.dto;
 
 /**
  *
- * May 11, 2022 2:09:05 PM
+ * May 29, 2022 1:14:12 AM
  *
  * @author Kevin V. Bui (kvb2univpitt@gmail.com)
  */
-public final class DateFormatters {
+public class BasicObservationDTO {
 
-    public static final DateFormat YYYY_MM_DD = new SimpleDateFormat("yyyy-mm-dd");
-    public static final DateFormat MM_DD_YYYY_HH_MM = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+    private String id;
+    private String category;
+    private String observation;
+    private String status;
 
-//    public static final DateTimeFormatter MM_DD_YYYY_HH_MM = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
-    private DateFormatters() {
+    public BasicObservationDTO() {
     }
 
-    public static Date yearMonthDayToDate(String yyyymmdd) throws ParseException {
-        return YYYY_MM_DD.parse(yyyymmdd);
+    public String getId() {
+        return id;
     }
 
-    public static String formatToMonthDayYearHourMinute(Date date) {
-        return MM_DD_YYYY_HH_MM.format(date);
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getObservation() {
+        return observation;
+    }
+
+    public void setObservation(String observation) {
+        this.observation = observation;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
 }

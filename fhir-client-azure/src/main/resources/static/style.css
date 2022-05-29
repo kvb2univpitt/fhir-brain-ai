@@ -72,3 +72,19 @@ body {
 .a-link-plain {
     text-decoration: none;
 }
+
+.btn-circle {
+    border-radius: 100%;
+    height: 2.5rem;
+    width: 2.5rem;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-circle.btn-sm, .btn-group-sm > .btn-circle.btn {
+    height: 1.8rem;
+    width: 1.8rem;
+    font-size: 0.75rem;
+}

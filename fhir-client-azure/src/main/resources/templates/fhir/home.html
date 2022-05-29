@@ -55,6 +55,24 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Encounters</h5>
+                                    <h5 class="card-subtitle mb-2"><span class="badge rounded-pill bg-primary" th:text="${encounterCounts}">0</span></h5>
+                                    <a href="#" th:href="@{/fhir/encounter}" class="card-link">View encounter list.</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Observations</h5>
+                                    <h5 class="card-subtitle mb-2"><span class="badge rounded-pill bg-primary" th:text="${observationCounts}">0</span></h5>
+                                    <a href="#" th:href="@{/fhir/observation}" class="card-link">View observation list.</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </main>
             </div>
