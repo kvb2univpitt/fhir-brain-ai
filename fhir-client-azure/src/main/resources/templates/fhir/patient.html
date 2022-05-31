@@ -31,7 +31,7 @@
                                         <tr>
                                             <th scope="col">Value</th>
                                             <th scope="col">System</th>
-                                            <th scope="col">Type</th>
+                                            <th scope="col"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -39,9 +39,13 @@
                                             <td th:text="${id.getValue()}" />
                                             <td th:text="${id.getSystem()}" />
                                             <td>
-                                                <button type="button" class="btn btn-secondary btn-circle btn-sm" data-bs-toggle="modal" data-bs-target="#idType" th:attr="data-bs-type=${@patientHelper.getCodingAsJson(id.getType().getCoding())}" th:unless="${#lists.isEmpty(id.getType().getCoding())}">
-                                                    <i class="bi bi-window text-light"></i>
-                                                </button>
+                                                <span data-bs-toggle="tooltip" title="Additional information">
+                                                    <i class="bi bi-info-circle-fill fs-5"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#idType"
+                                                       th:attr="data-bs-type=${@patientHelper.getCodingAsJson(id.getType().getCoding())}"
+                                                       th:unless="${#lists.isEmpty(id.getType().getCoding())}"></i>
+                                                </span>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -199,8 +203,13 @@
             </div>
         </div>
         <script src="../../static/jquery/jquery-3.6.0.slim.min.js" th:src="@{/jquery/jquery-3.6.0.slim.min.js}"></script>
-        <script src="../../static/bootstrap/js/bootstrap.min.js" th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+        <script src="../../static/bootstrap/js/bootstrap.bundle.min.js" th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
         <script>
+            let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
             $(document).ready(function () {
                 $('#idType').on('show.bs.modal', function (event) {
                     const button = event.relatedTarget;

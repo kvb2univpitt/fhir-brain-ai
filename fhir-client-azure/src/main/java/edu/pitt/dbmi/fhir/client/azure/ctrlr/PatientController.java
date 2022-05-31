@@ -47,34 +47,13 @@ public class PatientController {
         this.jsonParser = jsonParser;
     }
 
-    @GetMapping("/fhir/patient/{id}")
+    @GetMapping("/fhir/Patient/{id}")
     public String showPatientResourceLPage(
             @PathVariable final String id,
             @RegisteredOAuth2AuthorizedClient("azure") final OAuth2AuthorizedClient authorizedClient,
             final Model model) {
         Patient patient = patientResourceService.getPatient(authorizedClient.getAccessToken(), id);
 
-//        System.out.println("================================================================================");
-//        patient.getExtension().forEach(extension -> {
-//            System.out.println(extension.getUrl());
-//            if (extension.getValue() != null) {
-//                Type type = extension.getValue();
-//                System.out.println(extension.getValue().getClass().getName());
-//                if (type instanceof DecimalType decimal) {
-//                    System.out.println(decimal.getValueAsString());
-//                } else if (type instanceof Address address) {
-//                    System.out.printf("City: %s%n", address.getCity());
-//                    System.out.printf("Country: %s%n", address.getCountry());
-//                    System.out.printf("State: %s%n", address.getState());
-//                }
-//            }
-//
-//            extension.getExtension().forEach(e -> {
-//                System.out.printf("     > %s : %s%n", e.getUrl(), e.getValue().getClass().getName());
-//            });
-//            System.out.println();
-//        });
-//        System.out.println("================================================================================");
         model.addAttribute("authenName", authorizedClient.getPrincipalName());
         model.addAttribute("patient", patient);
 

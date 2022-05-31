@@ -20,6 +20,8 @@ package edu.pitt.dbmi.fhir.client.azure.conf;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import edu.pitt.dbmi.fhir.client.azure.utils.fhir.EncounterHelper;
+import edu.pitt.dbmi.fhir.client.azure.utils.fhir.ObservationHelper;
 import edu.pitt.dbmi.fhir.client.azure.utils.fhir.PatientHelper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +48,16 @@ public class AppConfig {
     @Bean
     public PatientHelper patientHelper() {
         return new PatientHelper();
+    }
+
+    @Bean
+    public EncounterHelper encounterHelper() {
+        return new EncounterHelper();
+    }
+
+    @Bean
+    public ObservationHelper observationHelper() {
+        return new ObservationHelper();
     }
 
 }

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="../../static/bootstrap/css/bootstrap.min.css" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+        <link rel="stylesheet" href="../../static/bootstrap-icons/bootstrap-icons.css" th:href="@{/bootstrap-icons/bootstrap-icons.css}" />
+        <link rel="stylesheet" href="../../static/style.css" th:href="@{/style.css}" />
+        <title>Encounter</title>
+    </head>
+    <body>
+        <header class="navbar navbar-dark sticky-top bg-pitt flex-md-nowrap p-0 shadow" th:replace="fhir/fragments/topbar.html :: topbar"></header>
+        <div class="container-fluid">
+            <div class="row">
+                <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" th:replace="fhir/fragments/sidebar.html :: sidebar"></nav>
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h2 th:text="${@encounterHelper.displayTypes(encounter.getType())}">Resources</h2>
+                    </div>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item"><a href="#" th:href="@{/fhir}">FHIR Resources</a></li>
+                        <li class="breadcrumb-item"><a href="#" th:href="@{/fhir/encounter}">Encounter Resources</a></li>
+                        <li class="breadcrumb-item active">Encounter</li>
+                    </ol>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm caption-top w-100">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">Class:</th>
+                                            <td th:text="${encounter.getClass_().getCode()}" />
+                                            <td>
+                                                <span data-bs-toggle="tooltip" title="Additional information">
+                                                    <i class="bi bi-info-circle-fill fs-5"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#resourceType"
+                                                       th:attr="data-bs-type=${@encounterHelper.getClassAsJson(encounter.getClass_())}"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Type:</th>
+                                            <td th:text="${@encounterHelper.displayTypes(encounter.getType())}" />
+                                            <td>
+                                                <span data-bs-toggle="tooltip" title="Additional information">
+                                                    <i class="bi bi-info-circle-fill fs-5"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#resourceType"
+                                                       th:attr="data-bs-type=${@encounterHelper.getTypeAsJson(encounter.getType())}"
+                                                       th:unless="${#lists.isEmpty(encounter.getType())}"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Subject:</th>
+                                            <td th:text="${encounter.getSubject().getDisplay()}" />
+                                            <td>
+                                                <span data-bs-toggle="tooltip" title="View patient">
+                                                    <a class="a-link-plain" href="#" th:href="@{'/fhir/' + ${encounter.getSubject().getReference()}}" target="_blank">
+                                                        <i class="bi bi-person-circle fs-5"></i>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Participant:</th>
+                                            <td>
+                                                <span
+                                                    th:each="participant,iterStat : ${encounter.getParticipant()}"
+                                                    th:text="${participant.getIndividual().getDisplay()} + ${!iterStat.last ? ', ' : ''}"></span>
+                                            </td>
+                                            <td>
+                                                <span data-bs-toggle="tooltip"
+                                                      th:title="${participant.getIndividual().getDisplay()}"
+                                                      th:each="participant : ${encounter.getParticipant()}">
+                                                    <a class="a-link-plain" href="#" th:href="@{'/fhir/' + ${participant.getIndividual().getReference()}}" target="_blank">
+                                                        <i class="bi bi-person-circle fs-5"></i>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Start:</th>
+                                            <td th:text="${@encounterHelper.formatDateTime(encounter.getPeriod().getStart())}" />
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">End:</th>
+                                            <td th:text="${@encounterHelper.formatDateTime(encounter.getPeriod().getEnd())}" />
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Status:</th>
+                                            <td th:text="${encounter.getStatus().getDisplay()}" />
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Service Provider:</th>
+                                            <td th:text="${encounter.getServiceProvider().getDisplay()}" />
+                                            <td>
+                                                <span data-bs-toggle="tooltip" title="View service provider">
+                                                    <a class="a-link-plain" href="#" th:href="@{'/fhir/' + ${encounter.getServiceProvider().getReference()}}" target="_blank">
+                                                        <i class="bi bi-hospital-fill fs-5"></i>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <div class="modal fade" id="resourceType" tabindex="-1" aria-labelledby="identifierLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-body">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="../../static/jquery/jquery-3.6.0.slim.min.js" th:src="@{/jquery/jquery-3.6.0.slim.min.js}"></script>
+        <script src="../../static/bootstrap/js/bootstrap.bundle.min.js" th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+        <script>
+            let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            $(document).ready(function () {
+                $('#resourceType').on('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const typeStr = button.getAttribute('data-bs-type');
+                    let types = JSON.parse(typeStr);
+
+                    types.forEach(t => {
+                        let html = [];
+                        t.codes.forEach(c => {
+                            html.push(`<tr><td>${c.display}</td><td>${c.code}</td><td>${c.system}</td></tr>`);
+                        });
+
+                        let caption = t.text;
+                        let tableContent = html.join();
+
+                        let htmlTable = `<div class="table-responsive">
+                            <table class="table table-striped table-sm caption-top">
+                                <caption class="fw-bold">${caption}</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Display</th>
+                                        <th scope="col">Code</th>
+                                        <th scope="col">System</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableContent}
+                                </tbody>
+                            </table>
+                        </div>`;
+
+                        $("#resourceType .modal-body").html(htmlTable);
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

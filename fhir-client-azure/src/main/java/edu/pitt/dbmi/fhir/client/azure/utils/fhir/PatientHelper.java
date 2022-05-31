@@ -20,7 +20,7 @@ package edu.pitt.dbmi.fhir.client.azure.utils.fhir;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.Serializable;
+import edu.pitt.dbmi.fhir.client.azure.utils.fhir.model.Code;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Coding;
@@ -65,49 +65,6 @@ public class PatientHelper {
                 .map(name -> String.format("%s %s", name.getGivenAsSingleString(), name.getFamily()))
                 .collect(Collectors.joining(", "))
                 .trim();
-    }
-
-    public class Code implements Serializable {
-
-        private static final long serialVersionUID = -8464234990587439755L;
-
-        private String system;
-        private String code;
-        private String display;
-
-        public Code() {
-        }
-
-        public Code(String system, String code, String display) {
-            this.system = system;
-            this.code = code;
-            this.display = display;
-        }
-
-        public String getDisplay() {
-            return display;
-        }
-
-        public void setDisplay(String display) {
-            this.display = display;
-        }
-
-        public String getSystem() {
-            return system;
-        }
-
-        public void setSystem(String system) {
-            this.system = system;
-        }
-
-        public String getCode() {
-            return code;
-        }
-
-        public void setCode(String code) {
-            this.code = code;
-        }
-
     }
 
 }

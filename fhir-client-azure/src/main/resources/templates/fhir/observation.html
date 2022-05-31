@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="../../static/bootstrap/css/bootstrap.min.css" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+        <link rel="stylesheet" href="../../static/bootstrap-icons/bootstrap-icons.css" th:href="@{/bootstrap-icons/bootstrap-icons.css}" />
+        <link rel="stylesheet" href="../../static/style.css" th:href="@{/style.css}" />
+        <title>Observation</title>
+    </head>
+    <body>
+        <header class="navbar navbar-dark sticky-top bg-pitt flex-md-nowrap p-0 shadow" th:replace="fhir/fragments/topbar.html :: topbar"></header>
+        <div class="container-fluid">
+            <div class="row">
+                <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" th:replace="fhir/fragments/sidebar.html :: sidebar"></nav>
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h2 th:text="${observation.getCode().getText()}">Resources</h2>
+                    </div>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item"><a href="#" th:href="@{/fhir}">FHIR Resources</a></li>
+                        <li class="breadcrumb-item"><a href="#" th:href="@{/fhir/observation}">Observation Resources</a></li>
+                        <li class="breadcrumb-item active">Observation</li>
+                    </ol>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm caption-top w-100">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">Category:</th>
+                                            <td th:text="${@observationHelper.getCategoryDisplay(observation.getCategory())}" />
+                                            <td>
+                                                <span data-bs-toggle="tooltip" title="Additional information">
+                                                    <i class="bi bi-info-circle-fill fs-5"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#category"
+                                                       th:attr="data-bs-type=${@observationHelper.getCategoryAsJson(observation.getCategory())}"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Code</th>
+                                            <td th:text="${observation.getCode().getText()}" />
+                                            <td>
+                                                <span data-bs-toggle="tooltip" title="Additional information">
+                                                    <i class="bi bi-info-circle-fill fs-5"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#code"
+                                                       th:attr="data-bs-type=${@observationHelper.getCodeAsJson(observation.getCode())}"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Value:</th>
+                                            <td th:text="${observation.getValueQuantity().getValue() + ' ' + observation.getValueQuantity().getUnit()}" />
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Status:</th>
+                                            <td th:text="${observation.getStatus().getDisplay()}" />
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Subject:</th>
+                                            <td th:text="${observation.getSubject().getDisplay()}" />
+                                            <td>
+                                                <span data-bs-toggle="tooltip" title="View patient">
+                                                    <a class="a-link-plain" href="#" th:href="@{'/fhir/' + ${observation.getSubject().getReference()}}" target="_blank">
+                                                        <i class="bi bi-person-circle fs-5"></i>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Encounter:</th>
+                                            <td th:text="${observation.getEncounter().getDisplay()}" />
+                                            <td>
+                                                <span data-bs-toggle="tooltip" title="View encounter">
+                                                    <a class="a-link-plain" href="#" th:href="@{'/fhir/' + ${observation.getEncounter().getReference()}}" target="_blank">
+                                                        <i class="bi bi-person-badge-fill fs-5"></i>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <div class="modal fade" id="category" tabindex="-1" aria-labelledby="identifierLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-body">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="code" tabindex="-1" aria-labelledby="identifierLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-body">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="../../static/jquery/jquery-3.6.0.slim.min.js" th:src="@{/jquery/jquery-3.6.0.slim.min.js}"></script>
+        <script src="../../static/bootstrap/js/bootstrap.bundle.min.js" th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+        <script>
+            let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            $(document).ready(function () {
+                $('#category').on('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const typeStr = button.getAttribute('data-bs-type');
+                    let categories = JSON.parse(typeStr);
+
+                    let tableRows = [];
+                    categories.forEach(category => {
+                        category.codes.forEach(c => {
+                            tableRows.push(`<tr><td>${c.display}</td><td>${c.code}</td><td>${c.system}</td></tr>`);
+                        });
+                    });
+
+                    let tableRowContent = tableRows.join();
+                    let htmlTable = `<div class="table-responsive">
+                            <table class="table table-striped table-sm caption-top">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Display</th>
+                                        <th scope="col">Code</th>
+                                        <th scope="col">System</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRowContent}
+                                </tbody>
+                            </table>
+                        </div>`;
+
+                    $("#category .modal-body").html(htmlTable);
+                });
+
+                $('#code').on('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const typeStr = button.getAttribute('data-bs-type');
+                    let types = JSON.parse(typeStr);
+
+                    types.forEach(t => {
+                        let html = [];
+                        t.codes.forEach(c => {
+                            html.push(`<tr><td>${c.display}</td><td>${c.code}</td><td>${c.system}</td></tr>`);
+                        });
+
+                        let caption = t.text;
+                        let tableContent = html.join();
+
+                        let htmlTable = `<div class="table-responsive">
+                            <table class="table table-striped table-sm caption-top">
+                                <caption class="fw-bold">${caption}</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Display</th>
+                                        <th scope="col">Code</th>
+                                        <th scope="col">System</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableContent}
+                                </tbody>
+                            </table>
+                        </div>`;
+
+                        $("#code .modal-body").html(htmlTable);
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

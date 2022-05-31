@@ -19,12 +19,14 @@
 package edu.pitt.dbmi.fhir.client.azure.ctrlr;
 
 import edu.pitt.dbmi.fhir.client.azure.service.fhir.ObservationResourceService;
+import org.hl7.fhir.r4.model.Observation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  *
@@ -40,6 +42,19 @@ public class ObservationController {
     @Autowired
     public ObservationController(ObservationResourceService observationResourceService) {
         this.observationResourceService = observationResourceService;
+    }
+
+    @GetMapping("/fhir/Observation/{id}")
+    public String showPatientResourceLPage(
+            @PathVariable final String id,
+            @RegisteredOAuth2AuthorizedClient("azure") final OAuth2AuthorizedClient authorizedClient,
+            final Model model) {
+        Observation observation = observationResourceService.getObservation(authorizedClient.getAccessToken(), id);
+
+        model.addAttribute("authenName", authorizedClient.getPrincipalName());
+        model.addAttribute("observation", observation);
+
+        return "fhir/observation";
     }
 
     @GetMapping("/fhir/observation")

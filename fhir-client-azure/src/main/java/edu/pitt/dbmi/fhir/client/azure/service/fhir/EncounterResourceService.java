@@ -54,6 +54,23 @@ public class EncounterResourceService {
         this.fhirContext = fhirContext;
     }
 
+    public Encounter getEncounter(final OAuth2AccessToken accessToken, final String id) {
+        IGenericClient client = fhirContext.newRestfulGenericClient(fhirUrl);
+        client.registerInterceptor(new BearerTokenAuthInterceptor(accessToken.getTokenValue()));
+
+        Bundle bundle = client.search()
+                .forResource(Encounter.class)
+                .where(Encounter.RES_ID.exactly().identifier(id))
+                .returnBundle(Bundle.class)
+                .cacheControl(new CacheControlDirective().setNoCache(true))
+                .execute();
+
+        return bundle.getEntry().stream()
+                .map(e -> (Encounter) e.getResource())
+                .findFirst()
+                .orElse(null);
+    }
+
     public List<Encounter> getEncounters(OAuth2AccessToken accessToken) {
         IGenericClient client = fhirContext.newRestfulGenericClient(fhirUrl);
         client.registerInterceptor(new BearerTokenAuthInterceptor(accessToken.getTokenValue()));

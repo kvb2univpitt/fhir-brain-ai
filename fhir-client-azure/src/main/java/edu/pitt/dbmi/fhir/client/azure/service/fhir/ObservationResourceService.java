@@ -54,6 +54,23 @@ public class ObservationResourceService {
         this.fhirContext = fhirContext;
     }
 
+    public Observation getObservation(final OAuth2AccessToken accessToken, final String id) {
+        IGenericClient client = fhirContext.newRestfulGenericClient(fhirUrl);
+        client.registerInterceptor(new BearerTokenAuthInterceptor(accessToken.getTokenValue()));
+
+        Bundle bundle = client.search()
+                .forResource(Observation.class)
+                .where(Observation.RES_ID.exactly().identifier(id))
+                .returnBundle(Bundle.class)
+                .cacheControl(new CacheControlDirective().setNoCache(true))
+                .execute();
+
+        return bundle.getEntry().stream()
+                .map(e -> (Observation) e.getResource())
+                .findFirst()
+                .orElse(null);
+    }
+
     public int getCounts(OAuth2AccessToken accessToken) {
         IGenericClient client = fhirContext.newRestfulGenericClient(fhirUrl);
         client.registerInterceptor(new BearerTokenAuthInterceptor(accessToken.getTokenValue()));
