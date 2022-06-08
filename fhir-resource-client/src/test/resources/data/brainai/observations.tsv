@@ -1,0 +1,2 @@
+event_end_dt_tm	PERSON_ID	ENCNTR_ID	loinc_code	loinc_description	result_val	result_units_cd	Clinical Event Result Type	category.code
+02/12/2020 04:28:00 AM 	1	enc1	2160-0	Creatinine	1.39	mg/dL	numeric	laboratory

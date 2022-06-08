@@ -18,21 +18,19 @@
  */
 package edu.pitt.dbmi.fhir.resource.client;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import ca.uhn.fhir.rest.gclient.IDelete;
 import edu.pitt.dbmi.fhir.resource.mapper.r4.brainai.PatientResourceMapper;
 import edu.pitt.dbmi.fhir.resource.mapper.util.Delimiters;
-import edu.pitt.dbmi.fhir.resource.mapper.util.JsonResourceConverterR4;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 
 /**
@@ -43,91 +41,29 @@ import org.hl7.fhir.r4.model.Patient;
  */
 public class PatientResourceClient {
 
-    public static final FhirContext FHIR_CONTEXT = FhirContext.forR4();
+    private final IGenericClient client;
 
-    public static final String FHIR_URL = "https://brainai-init.fhir.azurehealthcareapis.com";
-    public static final String ACCESS_TOKEN = "";
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        IGenericClient client = FHIR_CONTEXT.newRestfulGenericClient(FHIR_URL);
-        client.registerInterceptor(new BearerTokenAuthInterceptor(ACCESS_TOKEN));
-
-//        showPatients(client);
-//        addPatients(client);
-//        deletePatients(client, "010cbf98-d5f4-11ec-9d64-0242ac120002");
-//        showPatientIdentifiers(client);
+    public PatientResourceClient(IGenericClient client) {
+        this.client = client;
     }
 
-    private static void deletePatients(IGenericClient client, String patientId) {
-        System.out.println("--------------------------------------------------------------------------------");
-        System.out.printf("Delete Patient: %s%n", patientId);
-        System.out.println("--------------------------------------------------------------------------------");
+    public Bundle addResourceFromJsonBundleFile(Path jsonFile, IParser jsonParser) {
+        try ( BufferedReader reader = Files.newBufferedReader(jsonFile, Charset.defaultCharset())) {
+            Bundle bundle = (Bundle) jsonParser.parseResource(reader);
 
-        Bundle patientBundle = getPatients(client);
-        patientBundle.getEntry().stream()
-                .map(e -> (Patient) e.getResource())
-                .forEach(patient -> {
-                    Identifier id = patient.getIdentifierFirstRep();
-                    if (id.getValue() != null) {
-                        if (patientId.compareTo(id.getValue()) == 0) {
-                            try {
-                                IDelete delete = client.delete();
-                                MethodOutcome outcome = delete.resource(patient).execute();
-                                System.out.printf("Patient (%s) has been removed.", outcome.getId().getValue());
-                            } catch (Exception exception) {
-                                exception.printStackTrace(System.err);
-                            }
-                        }
-                    }
-                });
+            return client.transaction().withBundle(bundle).execute();
+        } catch (IOException exception) {
+            exception.printStackTrace(System.err);
 
-        System.out.println();
-    }
-
-    private static void showPatientIdentifiers(IGenericClient client) {
-        System.out.println("--------------------------------------------------------------------------------");
-        System.out.println("Patient's Identifiers");
-        System.out.println("--------------------------------------------------------------------------------");
-
-        Bundle bundle = getPatients(client);
-        bundle.getEntry().stream()
-                .map(e -> (Patient) e.getResource())
-                .forEach(patient -> {
-                    System.out.println(patient.getIdentifierFirstRep().getValue());
-                });
-        System.out.println();
-    }
-
-    private static void showPatients(IGenericClient client) {
-        System.out.println("--------------------------------------------------------------------------------");
-        System.out.println("Patients");
-        System.out.println("--------------------------------------------------------------------------------");
-
-        Bundle bundle = getPatients(client);
-        Patient[] patients = bundle.getEntry().stream()
-                .map(e -> (Patient) e.getResource())
-                .collect(Collectors.toList()).toArray(new Patient[0]);
-        for (int i = 0; i < patients.length; i++) {
-            System.out.printf("%n---------   Patient %d   --------%n", i + 1);
-            System.out.println(JsonResourceConverterR4.resourceToJson(patients[i], true));
+            return null;
         }
-
-        System.out.println();
     }
 
-    private static void addPatients(IGenericClient client) {
-        System.out.println("--------------------------------------------------------------------------------");
-        System.out.println("Add Patients");
-        System.out.println("--------------------------------------------------------------------------------");
-
+    public Bundle addPatientsFromTsvFile(Path tsvFile) {
         Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.TRANSACTION);
 
-        Path file = Paths.get(PatientResourceClient.class.getResource("/data/brainai/persons.tsv").getFile());
-        Map<String, Patient> patients = PatientResourceMapper.getPatients(file, Delimiters.TAB_DELIM);
+        Map<String, Patient> patients = PatientResourceMapper.getPatients(tsvFile, Delimiters.TAB_DELIM);
         patients.values().forEach(patient -> {
             bundle.addEntry()
                     .setFullUrl(patient.getIdElement().getValue())
@@ -137,16 +73,31 @@ public class PatientResourceClient {
                     .setMethod(Bundle.HTTPVerb.POST);
         });
 
-        try {
-            Bundle patientBundle = client.transaction().withBundle(bundle).execute();
-            System.out.println(JsonResourceConverterR4.resourceToJson(patientBundle, true));
-        } catch (Exception exception) {
-            exception.printStackTrace(System.err);
-        }
-        System.out.println();
+        return client.transaction().withBundle(bundle).execute();
     }
 
-    private static Bundle getPatients(IGenericClient client) {
+    public MethodOutcome deletePatient(Patient patient) {
+        return client.delete().resource(patient).execute();
+    }
+
+    public Bundle searchPatient(String resourceId) {
+        return client
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.RES_ID.exactly().identifier(resourceId))
+                .returnBundle(Bundle.class)
+                .cacheControl(new CacheControlDirective().setNoCache(true))
+                .execute();
+    }
+
+    public Patient getPatient(String resourceId) {
+        return client.read()
+                .resource(Patient.class)
+                .withId(resourceId)
+                .execute();
+    }
+
+    public Bundle getPatients() {
         return client
                 .search()
                 .forResource(Patient.class)
