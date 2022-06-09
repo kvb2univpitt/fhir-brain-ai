@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="../../static/bootstrap/css/bootstrap.min.css" th:href="@{/bootstrap/css/bootstrap.min.css}" />
         <link rel="stylesheet" href="../../static/bootstrap-icons/bootstrap-icons.css" th:href="@{/bootstrap-icons/bootstrap-icons.css}" />
         <link rel="stylesheet" href="../../static/style.css" th:href="@{/style.css}" />
+        <link rel="stylesheet" href="../../static/highlight/styles/default.min.css" th:href="@{/highlight/styles/default.min.css}" />
         <title>Patient</title>
     </head>
     <body>
@@ -174,6 +175,11 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <pre><code class="language-json" id="jsonResource"></code></pre>
+                        </div>
+                    </div>
                 </main>
             </div>
         </div>
@@ -204,6 +210,8 @@
         </div>
         <script src="../../static/jquery/jquery-3.6.0.slim.min.js" th:src="@{/jquery/jquery-3.6.0.slim.min.js}"></script>
         <script src="../../static/bootstrap/js/bootstrap.bundle.min.js" th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+        <script src="../../static/highlight/highlight.min.js" th:src="@{/highlight/highlight.min.js}"></script>
+        <script>hljs.highlightAll();</script>
         <script>
             let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -224,6 +232,12 @@
                     $("#idType tbody").html(html.join('\n'));
                 });
             });
+        </script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            var jsonStr = /*[[${json}]]*/ {};
+            /*]]>*/
+            document.getElementById('jsonResource').innerHTML = JSON.stringify(JSON.parse(jsonStr), null, 4);
         </script>
     </body>
 </html>

@@ -56,6 +56,7 @@ public class PatientController {
 
         model.addAttribute("authenName", authorizedClient.getPrincipalName());
         model.addAttribute("patient", patient);
+        model.addAttribute("json", jsonParser.encodeResourceToString(patient));
 
         return "fhir/patient";
     }
