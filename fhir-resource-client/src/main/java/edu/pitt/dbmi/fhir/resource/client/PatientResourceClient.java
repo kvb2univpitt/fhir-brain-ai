@@ -20,8 +20,10 @@ package edu.pitt.dbmi.fhir.resource.client;
 
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import edu.pitt.dbmi.fhir.resource.mapper.r4.brainai.EncounterResourceMapper;
 import edu.pitt.dbmi.fhir.resource.mapper.r4.brainai.PatientResourceMapper;
 import edu.pitt.dbmi.fhir.resource.mapper.util.Delimiters;
 import java.io.BufferedReader;
@@ -30,7 +32,11 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 
 /**
@@ -47,6 +53,36 @@ public class PatientResourceClient {
         this.client = client;
     }
 
+    public void deleteAll(Path jsonFile, IParser jsonParser) {
+        try ( BufferedReader reader = Files.newBufferedReader(jsonFile, Charset.defaultCharset())) {
+            Bundle bundle = (Bundle) jsonParser.parseResource(reader);
+            bundle.getEntry().forEach(e -> {
+                Bundle searchBundle = client
+                        .search()
+                        .forResource(e.getResource().getClass())
+                        .returnBundle(Bundle.class)
+                        .cacheControl(new CacheControlDirective().setNoCache(true))
+                        .execute();
+
+                Bundle deleteBundle = new Bundle();
+                deleteBundle.setType(Bundle.BundleType.TRANSACTION);
+
+                searchBundle.getEntry()
+                        .forEach(resource -> deleteBundle.addEntry().getRequest().setUrl(resource.getFullUrl()).setMethod(Bundle.HTTPVerb.DELETE));
+                while (searchBundle.getLink(IBaseBundle.LINK_NEXT) != null) {
+                    searchBundle = client.loadPage().next(searchBundle).execute();
+
+                    searchBundle.getEntry()
+                            .forEach(resource -> deleteBundle.addEntry().getRequest().setUrl(resource.getFullUrl()).setMethod(Bundle.HTTPVerb.DELETE));
+                }
+
+                client.transaction().withBundle(deleteBundle).execute();
+            });
+        } catch (IOException exception) {
+            exception.printStackTrace(System.err);
+        }
+    }
+
     public Bundle addResourceFromJsonBundleFile(Path jsonFile, IParser jsonParser) {
         try ( BufferedReader reader = Files.newBufferedReader(jsonFile, Charset.defaultCharset())) {
             Bundle bundle = (Bundle) jsonParser.parseResource(reader);
@@ -57,6 +93,24 @@ public class PatientResourceClient {
 
             return null;
         }
+    }
+
+    public Bundle addEncountersFromTsvFile(Path patientTsvFile, Path encounterTsvFile) {
+        Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.TRANSACTION);
+
+        Map<String, Patient> patients = PatientResourceMapper.getPatients(patientTsvFile, Delimiters.TAB_DELIM);
+        Map<String, Encounter> encounters = EncounterResourceMapper.getEncountersFromFile(encounterTsvFile, Delimiters.TAB_DELIM, patients);
+        encounters.values().forEach(encounter -> {
+            bundle.addEntry()
+                    .setFullUrl(encounter.getIdElement().getValue())
+                    .setResource(encounter)
+                    .getRequest()
+                    .setUrl("Encounter")
+                    .setMethod(Bundle.HTTPVerb.POST);
+        });
+
+        return client.transaction().withBundle(bundle).execute();
     }
 
     public Bundle addPatientsFromTsvFile(Path tsvFile) {
@@ -74,6 +128,130 @@ public class PatientResourceClient {
         });
 
         return client.transaction().withBundle(bundle).execute();
+    }
+
+    public void deleteAllPatients() {
+        Bundle searchBundle = client
+                .search()
+                .forResource(Patient.class)
+                .returnBundle(Bundle.class)
+                .cacheControl(new CacheControlDirective().setNoCache(true))
+                .execute();
+
+        Bundle deleteBundle = new Bundle();
+        deleteBundle.setType(Bundle.BundleType.TRANSACTION);
+
+        searchBundle.getEntry()
+                .forEach(e -> deleteBundle
+                .addEntry()
+                .getRequest().setUrl(e.getFullUrl())
+                .setMethod(Bundle.HTTPVerb.DELETE));
+
+        while (searchBundle.getLink(IBaseBundle.LINK_NEXT) != null) {
+            searchBundle = client
+                    .loadPage()
+                    .next(searchBundle)
+                    .execute();
+
+            searchBundle.getEntry().stream()
+                    .forEach(e -> deleteBundle
+                    .addEntry()
+                    .getRequest().setUrl(e.getFullUrl())
+                    .setMethod(Bundle.HTTPVerb.DELETE));
+        }
+
+        client.transaction().withBundle(deleteBundle).execute();
+    }
+
+    public void deleteEncounters(String patientId) {
+        Bundle searchBundle = client.search()
+                .forResource(Encounter.class)
+                .where(Encounter.PATIENT.hasId(new IdType("Patient", patientId)))
+                .returnBundle(Bundle.class)
+                .cacheControl(new CacheControlDirective().setNoCache(true))
+                .execute();
+
+        Bundle deleteBundle = new Bundle();
+        deleteBundle.setType(Bundle.BundleType.TRANSACTION);
+
+        searchBundle.getEntry().stream()
+                .map(e -> (Encounter) e.getResource())
+                .forEach(encounter -> {
+                    deleteBundle.addEntry()
+                            .getRequest()
+                            .setUrl("Encounter/" + encounter.getIdElement().getIdPart())
+                            .setMethod(Bundle.HTTPVerb.DELETE);
+                });
+
+        while (searchBundle.getLink(IBaseBundle.LINK_NEXT) != null) {
+            searchBundle = client
+                    .loadPage()
+                    .next(searchBundle)
+                    .execute();
+
+            searchBundle.getEntry().stream()
+                    .map(e -> (Encounter) e.getResource())
+                    .forEach(encounter -> {
+                        deleteBundle.addEntry()
+                                .getRequest()
+                                .setUrl("Encounter/" + encounter.getIdElement().getIdPart())
+                                .setMethod(Bundle.HTTPVerb.DELETE);
+                    });
+        }
+
+        client.transaction().withBundle(deleteBundle).execute();
+    }
+
+    public void deleteObservations(String patientId) {
+        Bundle searchBundle = client.search()
+                .forResource(Observation.class)
+                .where(Observation.PATIENT.hasId(new IdType("Patient", patientId)))
+                .returnBundle(Bundle.class)
+                .cacheControl(new CacheControlDirective().setNoCache(true))
+                .execute();
+
+        Bundle deleteBundle = new Bundle();
+        deleteBundle.setType(Bundle.BundleType.TRANSACTION);
+
+        searchBundle.getEntry().stream()
+                .map(e -> (Observation) e.getResource())
+                .forEach(observation -> {
+                    deleteBundle.addEntry()
+                            .getRequest()
+                            .setUrl("Observation/" + observation.getIdElement().getIdPart())
+                            .setMethod(Bundle.HTTPVerb.DELETE);
+                });
+
+        while (searchBundle.getLink(IBaseBundle.LINK_NEXT) != null) {
+            searchBundle = client
+                    .loadPage()
+                    .next(searchBundle)
+                    .execute();
+
+            searchBundle.getEntry().stream()
+                    .map(e -> (Observation) e.getResource())
+                    .forEach(observation -> {
+                        deleteBundle.addEntry()
+                                .getRequest()
+                                .setUrl("Observation/" + observation.getIdElement().getIdPart())
+                                .setMethod(Bundle.HTTPVerb.DELETE);
+                    });
+        }
+
+        client.transaction().withBundle(deleteBundle).execute();
+    }
+
+    /**
+     * Not supported by Azure.
+     *
+     * @param patient
+     * @return
+     */
+    public MethodOutcome deletePatientCascade(Patient patient) {
+        return client.delete()
+                .resource(patient)
+                .cascade(DeleteCascadeModeEnum.DELETE)
+                .execute();
     }
 
     public MethodOutcome deletePatient(Patient patient) {

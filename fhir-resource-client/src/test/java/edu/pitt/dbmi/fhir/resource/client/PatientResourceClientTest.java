@@ -42,7 +42,7 @@ public class PatientResourceClientTest {
     private final IParser jsonParser = fhirContext.newJsonParser();
 
     private final String fhirUrl = "https://brainai-init.fhir.azurehealthcareapis.com";
-    private final String accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiJodHRwczovL2JyYWluYWktaW5pdC5maGlyLmF6dXJlaGVhbHRoY2FyZWFwaXMuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvOWVmOWY0ODktZTBhMC00ZWViLTg3Y2MtM2E1MjYxMTJmZDBkLyIsImlhdCI6MTY1NDcxMTA3NywibmJmIjoxNjU0NzExMDc3LCJleHAiOjE2NTQ3MTYyMDcsImFjciI6IjEiLCJhaW8iOiJFMlpnWU9BdmNYaTI5OUhqL2gzK2F0UEtINmF1VWlxVmxQQTlVbTg1Zzlrb2E0OEFWeEVBIiwiYXBwaWQiOiJiYTM4ZjliMi01MTViLTRjNjAtOTVjNS05ZmI4ODM2ZTJkM2YiLCJhcHBpZGFjciI6IjEiLCJmYW1pbHlfbmFtZSI6IkJ1aSIsImdpdmVuX25hbWUiOiJLZXZpbiIsImlwYWRkciI6Ijc2LjEyNS4xODguNjciLCJuYW1lIjoiQnVpLCBLZXZpbiBWYW4iLCJvaWQiOiIyMWExZjc3ZC05ZDljLTQwNjItOGNiZi1mYmM1YzVjZjRiMTEiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtMjM2MTk4NDU5Ny0yMDM5NTQ5NzgyLTMxODAyMDQxMTgtNDQ1NzAiLCJwdWlkIjoiMTAwM0JGRkQ4MjMzNTk1QiIsInJoIjoiMC5BVmdBaWZUNW5xRGc2MDZIekRwU1lSTDlEZGg0WjBfdld0eERvZi13YzNKTGxKVllBQVkuIiwic2NwIjoidXNlcl9pbXBlcnNvbmF0aW9uIiwic3ViIjoiY19Cd1E1MV81TmdsdC1LTzYxN0pyQm1FMHB5aVdVZVdpQ19QUU83UEU3TSIsInRpZCI6IjllZjlmNDg5LWUwYTAtNGVlYi04N2NjLTNhNTI2MTEyZmQwZCIsInVuaXF1ZV9uYW1lIjoiS1ZCMkBwaXR0LmVkdSIsInVwbiI6IktWQjJAcGl0dC5lZHUiLCJ1dGkiOiJfOWZTaUlaUWdrV0JjOHpZU05vbUFBIiwidmVyIjoiMS4wIn0.rdd_V7Bg0DB2hFV0iYyXRz5Z6TyT2lVNuKsFMdsnZoqBWVod9UcGi6N44m6IDSclBcZE2rpnkQUbe0On8-LTNO6MQG-4o-Ir9VNycMEyRWUOVn_MIE3iCFZ0NwkGSkE36AcwYDcH4WlHcdRn55UIlhOhTutVNm-g08I0II1LcO7dcK1Fm-q4KdCAzAuK8HeEK7w2g9Br--_gW0NeK_lm976EH4htwD5Mnub9PPUZQ-vDhaPBCmhOicqRi5fwayT8YkTKaquaqjl_BCcy7nbvZfTIqYnrVj3aGtL9oUtiTm0uKiJSMDtRqVElEn1tYzSENSPWzi81n763XK3cjc7aNQ";
+    private final String accessToken = "";
 
     /**
      * Test of main method, of class PatientResourceClient.
@@ -52,8 +52,14 @@ public class PatientResourceClientTest {
         PatientResourceClient client = new PatientResourceClient(getClient());
 
         try {
+//            printDeleteAllFromJsonFile(client);
+//            printAddEncountersFromTsvFile(client);
 //            printAddBundleFromJsonFile(client);
 //            printAddPatientsFromTsvFile(client);
+//            printDeleteAllPatients(client);
+//            printDeleteEncounters(client);
+//            printDeleteObservations(client);
+//            printDeleteCascadeBrainAIPatient(client);
 //            printDeleteBrainAIPatient(client);
 //            printSearchPatientByResourceId(client);
 //            printGetPatientById(client);
@@ -80,6 +86,22 @@ public class PatientResourceClientTest {
 
     }
 
+    private void printAddEncountersFromTsvFile(PatientResourceClient client) {
+        Path patientTsvFile = Paths.get(PatientResourceClientTest.class.getResource("/data/brainai/persons.tsv").getFile());
+        Path encounterTsvFile = Paths.get(PatientResourceClientTest.class.getResource("/data/brainai/encounters.tsv").getFile());
+        System.out.println("--------------------------------------------------------------------------------");
+        System.out.printf("Add Encounters From TSV File: %s%n", encounterTsvFile.toString());
+        System.out.println("--------------------------------------------------------------------------------");
+
+        Bundle bundle = client.addEncountersFromTsvFile(patientTsvFile, encounterTsvFile);
+        if (bundle != null) {
+            jsonParser.setPrettyPrint(true);
+            System.out.println(jsonParser.encodeResourceToString(bundle));
+        }
+
+        System.out.println();
+    }
+
     private void printAddPatientsFromTsvFile(PatientResourceClient client) {
         Path file = Paths.get(PatientResourceClientTest.class.getResource("/data/brainai/persons.tsv").getFile());
         System.out.println("--------------------------------------------------------------------------------");
@@ -95,8 +117,60 @@ public class PatientResourceClientTest {
         System.out.println();
     }
 
+    private void printDeleteAllFromJsonFile(PatientResourceClient client) {
+        Path file = Paths.get(PatientResourceClientTest.class.getResource("/data/synthea/Aaron697_Brekke496_2fa15bc7-8866-461a-9000-f739e425860a.json").getFile());
+        System.out.println("--------------------------------------------------------------------------------");
+        System.out.printf("Delete All From JSON Bundle File: %s%n", file.toString());
+        System.out.println("--------------------------------------------------------------------------------");
+
+        client.deleteAll(file, jsonParser);
+        System.out.println();
+    }
+
+    private void printDeleteAllPatients(PatientResourceClient client) {
+        System.out.println("--------------------------------------------------------------------------------");
+        System.out.println("Delete All Patients");
+        System.out.println("--------------------------------------------------------------------------------");
+
+        client.deleteAllPatients();
+        System.out.println();
+    }
+
+    private void printDeleteEncounters(PatientResourceClient client) {
+        String patientId = "593c23cc-980c-49c9-876d-6ca9a58510f1";
+        System.out.println("--------------------------------------------------------------------------------");
+        System.out.printf("Delete Observations For Patient: %s%n", patientId);
+        System.out.println("--------------------------------------------------------------------------------");
+
+        client.deleteEncounters(patientId);
+        System.out.println();
+    }
+
+    private void printDeleteObservations(PatientResourceClient client) {
+        String patientId = "593c23cc-980c-49c9-876d-6ca9a58510f1";
+        System.out.println("--------------------------------------------------------------------------------");
+        System.out.printf("Delete Observations For Patient: %s%n", patientId);
+        System.out.println("--------------------------------------------------------------------------------");
+
+        client.deleteObservations(patientId);
+        System.out.println();
+    }
+
+    private void printDeleteCascadeBrainAIPatient(PatientResourceClient client) {
+        Patient patient = client.getPatient("593c23cc-980c-49c9-876d-6ca9a58510f1");
+
+        System.out.println("--------------------------------------------------------------------------------");
+        System.out.printf("Delete Patient: %s (%s)%n",
+                patient.getNameFirstRep().getNameAsSingleString(),
+                patient.getIdentifierFirstRep().getValue());
+        System.out.println("--------------------------------------------------------------------------------");
+
+        client.deletePatientCascade(patient);
+        System.out.println();
+    }
+
     private void printDeleteBrainAIPatient(PatientResourceClient client) {
-        Patient patient = client.getPatient("f0d175f3-02ec-45bb-a1d4-47df16db0f7d");
+        Patient patient = client.getPatient("7345098c-11cf-4aee-aa23-e0344f937dff");
 
         System.out.println("--------------------------------------------------------------------------------");
         System.out.printf("Delete Patient: %s (%s)%n",
